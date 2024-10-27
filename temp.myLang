@@ -1,5 +1,5 @@
 public class ParentClass{
-    public print(content){
+    publicz print(content){
         # print functionality
     }
 }

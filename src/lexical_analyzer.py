@@ -9,19 +9,19 @@ class LexicalAnalyzer:
         
     def classify_token(self, token):
         if token in keywords:
-            return (keywords.get(token), token)
+            return keywords.get(token), token
         elif token in operators:
-            return (operators.get(token), token)
+            return operators.get(token), token
         elif token in punctuators:
-            return (punctuators.get(token), token)
+            return punctuators.get(token), token
         elif re.match(identifier_re, token):
-            return ("IDENTIFIER", token)
+            return "IDENTIFIER", token
         elif re.match(integer_re, token):
-            return ("INTEGER_CONSTANT", token)
+            return "INT_CONSTANT", token
         elif re.match(float_re, token):
-            return ("FLOAT_CONSTANT", token)
+            return "FLOAT_CONSTANT", token
         elif re.match(string_re, token):
-            return ("STRING_CONSTANT", token)
+            return "STRING", token
         else:
             raise Exception("unrecognized Token: ", token)
         
@@ -79,7 +79,7 @@ class LexicalAnalyzer:
                         break
                     i+=1
                 token_type, value = self.classify_token(temp)
-                self.tokens.append([token_type,value,line_number])
+                self.tokens.append({"type":token_type,"value":value,})
                 temp=""
                 i+=1
                 continue
@@ -88,7 +88,7 @@ class LexicalAnalyzer:
             if char =="\n":
                 if temp:
                     token_type, value = self.classify_token(temp)
-                    self.tokens.append([token_type,value,line_number])
+                    self.tokens.append({"type":token_type,"value":value,})
                 temp=""
                 i+=1
                 line_number+=1
@@ -98,7 +98,7 @@ class LexicalAnalyzer:
             if char in [" ","\t"]:
                 if temp:
                     token_type, value = self.classify_token(temp)
-                    self.tokens.append([token_type,value,line_number])
+                    self.tokens.append({"type":token_type,"value":value,})
                 temp=""
                 i+=1
                 continue
@@ -107,7 +107,7 @@ class LexicalAnalyzer:
             if char in punctuators:
                 if temp:
                     token_type, value = self.classify_token(temp)
-                    self.tokens.append([token_type, value, line_number])
+                    self.tokens.append({"type":token_type,"value":value,})
                     temp = ""
                 if char == ".":
                     status = False
@@ -119,7 +119,7 @@ class LexicalAnalyzer:
 
                         if status == True:
                             token_type, value = self.classify_token(temp)
-                            self.tokens.append([token_type, value, line_number])
+                            self.tokens.append({"type":token_type,"value":value,})
                             temp = ""
                             status = False
                     elif self.source_code[i + 1] not in "1234567890":
@@ -132,12 +132,12 @@ class LexicalAnalyzer:
                     if temp + char not in operators:
                         
                         token_type, value = self.classify_token(temp)
-                        self.tokens.append([token_type, value, line_number])
+                        self.tokens.append({"type":token_type,"value":value,})
                         temp = ""
                     else:
                         temp += char
                         token_type, value = self.classify_token(temp)
-                        self.tokens.append([token_type, value, line_number])
+                        self.tokens.append({"type":token_type,"value":value,})
                         temp = ""
                         char = ""
 
@@ -151,7 +151,7 @@ class LexicalAnalyzer:
                     check = temp + self.source_code[i + 1]
                     if check not in operators:
                         token_type, value = self.classify_token(temp)
-                        self.tokens.append([token_type, value, line_number])
+                        self.tokens.append({"type":token_type,"value":value,})
                         temp = ""
 
             i += 1
@@ -160,14 +160,18 @@ class LexicalAnalyzer:
             if i == length:
                 if temp:
                     token_type, value = self.classify_token(temp)
-                    self.tokens.append([token_type, value, line_number])
-    
+                    self.tokens.append({"type":token_type,"value":value,})
+        # extra token for notifying end of file
+        # self.tokens.append({"type":"EOF","value":"",})
+        return self.tokens
     
     def print_tokens(self,):
         for token in self.tokens:
             print(token)
 
-
+    def save_tokens(self):
+        with open("tokens.json", "w") as f:
+            f.write(str(self.tokens))
             
             
                 
